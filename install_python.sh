@@ -1,11 +1,48 @@
 #!/bin/bash
-#set -e
+
+##
+## Script to install CPython from source on your machine.
+## Adapted from Matthew M. Feickert: https://github.com/matthewfeickert/Docker-Python3-Ubuntu.
+##
+## author: Daniel Joseph Antri
+## e-mail: dantrim1023@gmail.com
+## date: May 2020
+##
+
 default_python_version_tag=3.8.2
 default_optimized=0
+default_lto=0
 default_prefix=${PWD}
 
 function print_usage {
-    printf "\nUsage...\n"
+    echo "---------------------------------------------------------"
+    echo " install CPython from source"
+    echo ""
+    echo " This script will download and install CPython for you."
+    echo " It installs the python version of your choice, with"
+    echo " pip as well."
+    echo ""
+    echo " Usage:"
+    echo "   $ source install_python.sh [OPTIONS]"
+    echo ""
+    echo " Options:"
+    echo "  -v              Python version [default: ${default_python_version_tag}]"
+    echo "  -p              Set installation prefix (where python will be installed)"
+    echo "                      This is where the python header files, python executable," 
+    echo "                      and pip executable will be installed (along with everything else)"
+    echo "                      [default: \${PWD}=${default_prefix}]"
+    echo "  -o              Enable optimized installation"
+    echo "                      This corresponds to the CPython configuration flag"
+    echo "                      \"--enable-optimizations\""
+    echo "                      [default: false]"
+    echo "  -l              Enable link-time-optimization (lto)"
+    echo "                      This corresponds to the CPython configuration flag \"--with-lto\""
+    echo "                      and providing this flag may not work on every build system."
+    echo "                      If providing this flag, and installation fails, try again"
+    echo "                      without providing it."
+    echo "                      [default: false]"
+    echo "" 
+    echo "---------------------------------------------------------"
 }
 
 function download_cpython {
@@ -39,21 +76,26 @@ function version {
 }
 
 function build_cpython {
+
     # 1: version tag
-    # 2: flag for optimized build
-    # 3: installation prefix
+    # 2: installation prefix
+    # 3: flag for optimized build
+    # 4: enable link-time-optimization (LTO)
 
-    printf "\n### Installing Python-${1} with prefix=${3}\n"
+    printf "\n### Installing Python-${1} with prefix=${2}\n"
 
-    configure_options="--prefix=${3} \
-        --exec_prefix=${3} \
-        #--with-lto \
+    configure_options="--prefix=${2} \
+        --exec_prefix=${2} \
         --enable-loadable-sqlite-extensions \
         --with-ensurepip=install \
         --enable-ipv6"
 
-    if [ ${2} -eq 1 ]; then
+    if [ ${3} -eq 1 ]; then
         configure_options="${configure_options} --enable-optimizations "
+    fi
+
+    if [ ${4} -eq 1 ]; then
+        configure_options="${configure_options} --with-lto "
     fi
 
     # --with-threads is removed in Python 3.7 (threading already on)
@@ -62,22 +104,60 @@ function build_cpython {
     fi
 
     printf "\n### Configuring: ${configure_options}\n"
-    ./configure ${configure_options}
-
-#ensurepip, enable-optimizations
+    ./configure ${configure_options} 2>&1 |tee configure_step.log
 
     printf "\n### make -j2\n"
-    make -j2
-    printf "\n### make -j2 test\n"
-    make -j2 test
+    make -j2 2>&1 |tee make_step.log
+    status=$?
+    if [[ $status -gt 0 ]] ; then
+        printf "\n### Failed to make\n"
+        return 1
+    fi
     printf "\n### make install\n"
-    make install
+    make install 2>&1 |tee make_install_step.log
+    status=$?
+    if [[ $status -gt 0 ]]; then
+        printf "\n### Failed to make install\n"
+        return 1
+    fi
+
+    if [[ ! -f ./bin/python3 ]]; then
+        printf "\n### Failed to find python executable\n"
+        return 1
+    fi
+
+    return 0
+}
+
+function update_pip {
+
+    # 1: install prefix
+
+    if [[ ! -d ${1}/bin/ ]]; then
+        printf "\n### ERROR No ${1}/bin/ directory\n"
+        return 1
+    fi
+
+    if [[ ! -f ${1}/bin/pip3 ]]; then
+        printf "\n### ERROR No pip3 found in ${1}/bin/\n"
+        return 1
+    fi
+
+    cmd="${1}/bin/pip3 install --user --upgrade --no-cache-dir pip setuptools wheel"
+    if [[ "$(id -u)" -eq 0 ]]; then
+        cmd="${1}/bin/pip3 install --upgrade --no-cache-dir pip setuptools wheel"
+    fi
+    printf "\n### ${cmd}\n"
+    $cmd
+
+    return 0
 }
 
 function main {
 
     PYTHON_VERSION_TAG=${default_python_version_tag}
     OPTIMIZED_BUILD=${default_optimized}
+    WITH_LTO=${default_lto}
     INSTALL_PREFIX=${default_prefix}
 
     while test $# -gt 0
@@ -98,6 +178,10 @@ function main {
                 INSTALL_PREFIX=${2}
                 shift
                 ;;
+            -l)
+                WITH_LTO=${2}
+                shift
+                ;;
             *)
                 printf "\n### ERROR Invalid argument provided: $1\n"
                 return 1
@@ -116,12 +200,19 @@ function main {
 
     pushd Python-${PYTHON_VERSION_TAG}
 
-    #if ! build_cpython ${PYTHON_VERSION_TAG} ${OPTIMIZED_BUILD} ${INSTALL_PREFIX}; then
-    #    return 1
-    #fi
+    if ! build_cpython ${PYTHON_VERSION_TAG} ${INSTALL_PREFIX} ${OPTIMIZED_BUILD} ${WITH_LTO}; then
+        return 1
+    fi
+
+    if ! update_pip ${INSTALL_PREFIX} ; then
+        return 1
+    fi
+
+    printf "\n### Python-${1} executable location: ${INSTALL_PREFIX}/bin/python3\n"
+    printf "### pip executable location: ${INSTALL_PREFIX}/bin/pip3\n"
 
     popd
-    
+    return 0
 }
 
 #______________________________
