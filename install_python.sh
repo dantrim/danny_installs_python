@@ -4,7 +4,7 @@
 ## Script to install CPython from source on your machine.
 ## Adapted from Matthew M. Feickert: https://github.com/matthewfeickert/Docker-Python3-Ubuntu.
 ##
-## author: Daniel Joseph Antri
+## author: Daniel Joseph Antrim
 ## e-mail: dantrim1023@gmail.com
 ## date: May 2020
 ##
@@ -12,7 +12,7 @@
 default_python_version_tag=3.8.2
 default_optimized=0
 default_lto=0
-default_prefix=${PWD}
+default_prefix=${PWD}/Python-${default_python_version_tag}
 
 function print_usage {
     echo "---------------------------------------------------------"
@@ -30,7 +30,7 @@ function print_usage {
     echo "  -p              Set installation prefix (where python will be installed)"
     echo "                      This is where the python header files, python executable," 
     echo "                      and pip executable will be installed (along with everything else)"
-    echo "                      [default: \${PWD}=${default_prefix}]"
+    echo "                      [default: ${default_prefix}]"
     echo "  -o              Enable optimized installation"
     echo "                      This corresponds to the CPython configuration flag"
     echo "                      \"--enable-optimizations\""
@@ -121,7 +121,7 @@ function build_cpython {
         return 1
     fi
 
-    if [[ ! -f ./bin/python3 ]]; then
+    if [[ ! -f ${2}/bin/python3 ]]; then
         printf "\n### Failed to find python executable\n"
         return 1
     fi
