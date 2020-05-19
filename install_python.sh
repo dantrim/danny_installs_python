@@ -110,9 +110,12 @@ function build_cpython {
     ./configure ${configure_options} 2>&1 |tee configure_step.log
 
     printf "\n### make -j2\n"
-    export LDFLAGS="-L/usr/local/opt/sqlite/lib"
-    export CPPFLAGS="-I/usr/local/opt/sqlite/include"
-    CFLAGS="-I/usr/local/opt/sqlite/include" make -j2 2>&1 |tee make_step.log
+    if [ "$(uname)" == "Darwin" ]; then
+        export LDFLAGS="-L/usr/local/opt/sqlite/lib"
+        export CPPFLAGS="-I/usr/local/opt/sqlite/include"
+        export CFLAGS="-I/usr/local/opt/sqlite/include"
+    fi
+    make -j2 2>&1 |tee make_step.log
     status=$?
     if [[ $status -gt 0 ]] ; then
         printf "\n### Failed to make\n"
