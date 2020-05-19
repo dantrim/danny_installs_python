@@ -136,19 +136,19 @@ function update_pip {
 
     # 1: install prefix
 
-    if [[ ! -d ${1}/bin/ ]]; then
-        printf "\n### ERROR No ${1}/bin/ directory\n"
-        return 1
-    fi
+    #if [[ ! -d ${1}/bin/ ]]; then
+    #    printf "\n### ERROR No ${1}/bin/ directory\n"
+    #    return 1
+    #fi
 
-    if [[ ! -f ${1}/bin/pip3 ]]; then
-        printf "\n### ERROR No pip3 found in ${1}/bin/\n"
-        return 1
-    fi
+    #if [[ ! -f ${1}/bin/pip3 ]]; then
+    #    printf "\n### ERROR No pip3 found in ${1}/bin/\n"
+    #    return 1
+    #fi
 
-    cmd="${1}/bin/pip3 install --user --upgrade --no-cache-dir pip setuptools wheel"
+    cmd="pip3 install --user --upgrade --no-cache-dir pip setuptools wheel"
     if [[ "$(id -u)" -eq 0 ]]; then
-        cmd="${1}/bin/pip3 install --upgrade --no-cache-dir pip setuptools wheel"
+        cmd="pip3 install --upgrade --no-cache-dir pip setuptools wheel"
     fi
     printf "\n### ${cmd}\n"
     $cmd
@@ -212,11 +212,10 @@ function main {
     fi
 
     pyex=${INSTALL_PREFIX}/bin/python3
-    pipex=${INSTALL_PREFIX}/bin/pip3
     printf "${NC}================================================================="
     printf "\n### Python-${PYTHON_VERSION_TAG} executable location:\n${pyex}\n"
-    printf "### pip executable location:\n${pipex}\n"
-    printf "### ${RED}You must alias your \"python\" and \"pip\" command to these locations, e.g.:\n${NC}"
+    printf "\n### pip is available via python:\n$ python -m pip\n"
+    printf "### ${RED}You must alias your \"python\" command to the above location, e.g.:\n${NC}"
     printf "${RED}$ echo \"alias python=${pyex}\" >> ~/.bashrc ${NC}\n"
     printf "${NC}================================================================="
 
