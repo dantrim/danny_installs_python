@@ -215,7 +215,7 @@ function main {
     printf "${NC}================================================================="
     printf "\n### Python-${PYTHON_VERSION_TAG} executable location:\n${pyex}\n"
     printf "\n### pip is available via python:\n$ python -m pip\n"
-    printf "### ${RED}You must alias your \"python\" command to the above location, e.g.:\n${NC}"
+    printf "### ${RED}You must alias your \"python3\" command to the above location, e.g.:\n${NC}"
     printf "${RED}$ echo \"alias python=${pyex}\" >> ~/.bashrc ${NC}\n"
     printf "${NC}================================================================="
 
