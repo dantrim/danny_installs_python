@@ -14,6 +14,9 @@ default_optimized=0
 default_lto=0
 default_prefix=${PWD}/Python-${default_python_version_tag}
 
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 function print_usage {
     echo "---------------------------------------------------------"
     echo " install CPython from source"
@@ -26,21 +29,21 @@ function print_usage {
     echo "   $ source install_python.sh [OPTIONS]"
     echo ""
     echo " Options:"
-    echo "  -v              Python version [default: ${default_python_version_tag}]"
-    echo "  -p              Set installation prefix (where python will be installed)"
-    echo "                      This is where the python header files, python executable," 
-    echo "                      and pip executable will be installed (along with everything else)"
-    echo "                      [default: ${default_prefix}]"
-    echo "  -o              Enable optimized installation"
-    echo "                      This corresponds to the CPython configuration flag"
-    echo "                      \"--enable-optimizations\""
-    echo "                      [default: false]"
-    echo "  -l              Enable link-time-optimization (lto)"
-    echo "                      This corresponds to the CPython configuration flag \"--with-lto\""
-    echo "                      and providing this flag may not work on every build system."
-    echo "                      If providing this flag, and installation fails, try again"
-    echo "                      without providing it."
-    echo "                      [default: false]"
+    echo "  -v   Python version [default: ${default_python_version_tag}]"
+    echo "  -p   Set installation prefix (where python will be installed)"
+    echo "           This is where the python header files, python executable," 
+    echo "           and pip executable will be installed (along with everything else)"
+    echo "           [default: ${default_prefix}]"
+    echo "  -o   Enable optimized installation"
+    echo "           This corresponds to the CPython configuration flag"
+    echo "           \"--enable-optimizations\""
+    echo "           [default: false]"
+    echo "  -l   Enable link-time-optimization (lto)"
+    echo "           This corresponds to the CPython configuration flag \"--with-lto\""
+    echo "           and providing this flag may not work on every build system."
+    echo "           If providing this flag, and installation fails, try again"
+    echo "           without providing it."
+    echo "           [default: false]"
     echo "" 
     echo "---------------------------------------------------------"
 }
@@ -208,8 +211,14 @@ function main {
         return 1
     fi
 
-    printf "\n### Python-${1} executable location: ${INSTALL_PREFIX}/bin/python3\n"
-    printf "### pip executable location: ${INSTALL_PREFIX}/bin/pip3\n"
+    pyex=${INSTALL_PREFIX}/bin/python3
+    pipex=${INSTALL_PREFIX}/bin/pip3
+    printf "${NC}================================================================="
+    printf "\n### Python-${PYTHON_VERSION_TAG} executable location:\n${pyex}\n"
+    printf "### pip executable location:\n${pipex}\n"
+    printf "### ${RED}You must alias your \"python\" and \"pip\" command to these locations, e.g.:\n${NC}"
+    printf "${RED}$ echo \"alias python=${pyex}\" >> ~/.bashrc ${NC}\n"
+    printf "${NC}================================================================="
 
     popd
     return 0
