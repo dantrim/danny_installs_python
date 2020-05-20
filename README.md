@@ -2,7 +2,7 @@
 This is how you install `python` (>=3) from source.
 
 ## Pre-requisites
-Prior to installing python, `python` itself requires several external dependencies if you wish to have a complete installation.
+Prior to installing `python`, `python` itself requires several external dependencies if you wish to have a complete installation.
 The external dependencies are detailed in the [python docs](https://devguide.python.org/setup/#build-dependencies).
 
 You can install all necessary `python` dependencies for your architecture by following the steps outlined below:
