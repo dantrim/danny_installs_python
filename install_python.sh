@@ -124,15 +124,17 @@ function build_cpython {
         configure_options="${configure_options} --with-threads "
     fi
 
+    if [ ! "$(uname)" == "Darwin" ]; then
+        configure_options="${configure_options} LDFLAGS=\"-Wl,--rpath=${2}/lib\""
+    fi
     printf "\n### Configuring: ${configure_options}\n"
-    ./configure ${configure_options} 2>&1 |tee configure_step.log
+    if [ ! "$(uname)" == "Darwin" ]; then
+        ./configure ${configure_options} LDFLAGS="-Wl,--rpath=${2}/lib" 2>&1 |tee configure_step.log
+    else
+        ./configure ${configure_options} 2>&1 |tee configure_step.log
+    fi
 
     printf "\n### make -j%s\n" "${5}"
-    #if [ "$(uname)" == "Darwin" ]; then
-    #    export LDFLAGS="-L/usr/local/opt/sqlite/lib"
-    #    export CPPFLAGS="-I/usr/local/opt/sqlite/include"
-    #    export CFLAGS="-I/usr/local/opt/sqlite/include"
-    #fi
     make -j"${5}" 2>&1 |tee make_step.log
     status=$?
     if [[ $status -gt 0 ]] ; then
