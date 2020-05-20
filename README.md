@@ -46,7 +46,7 @@ $ source install_python.sh
 </details>
 
 Once you have ensured that the `python` dependencies are installed you are ready to proceed with compiling and installing
-`python` from source. Additional details on the `python` duild dependencies are provided [here](https://devguide.python.org/setup/#build-dependencies).
+`python` from source. Additional details on the `python` build dependencies are provided [here](https://devguide.python.org/setup/#build-dependencies).
 
 ## Installing python
 Checkout this package and do:
