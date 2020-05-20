@@ -30,10 +30,10 @@ function print_usage {
     echo ""
     echo " Options:"
     echo "  -v   Python version [default: ${default_python_version_tag}]"
-#    echo "  -p   Set installation prefix (where python will be installed)"
-#    echo "           This is where the python header files, python executable," 
-#    echo "           and pip executable will be installed (along with everything else)"
-#    echo "           [default: ${default_prefix}]"
+    #echo "  -p   Set installation prefix (where python will be installed)"
+    #echo "           This is where the python header files, python executable," 
+    #echo "           and pip executable will be installed (along with everything else)"
+    #echo "           [default: ${default_prefix}]"
     echo "  -o   Enable optimized installation"
     echo "           This corresponds to the CPython configuration flag"
     echo "           \"--enable-optimizations\""
@@ -110,11 +110,6 @@ function build_cpython {
     ./configure ${configure_options} 2>&1 |tee configure_step.log
 
     printf "\n### make -j2\n"
-    if [ "$(uname)" == "Darwin" ]; then
-        export LDFLAGS="-L/usr/local/opt/sqlite/lib"
-        export CPPFLAGS="-I/usr/local/opt/sqlite/include"
-        export CFLAGS="-I/usr/local/opt/sqlite/include"
-    fi
     make -j2 2>&1 |tee make_step.log
     status=$?
     if [[ $status -gt 0 ]] ; then
@@ -166,7 +161,7 @@ function main {
     PYTHON_VERSION_TAG=${default_python_version_tag}
     OPTIMIZED_BUILD=${default_optimized}
     WITH_LTO=${default_lto}
-    INSTALL_PREFIX=${default_prefix}
+    #INSTALL_PREFIX=${default_prefix}
 
     while test $# -gt 0
     do
@@ -197,6 +192,8 @@ function main {
         esac
         shift
     done
+
+    INSTALL_PREFIX=${PWD}/Python-${PYTHON_VERSION_TAG}
 
     if ! has_wget ; then
         return 1
