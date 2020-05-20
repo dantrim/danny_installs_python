@@ -28,7 +28,7 @@ $ brew reinstall sqlite3
 $ export LDFLAGS="-L/usr/local/opt/sqlite/lib"
 $ export CPPFLAGS="-I/usr/local/opt/sqlite/include"
 # ^^ repeate for the any other packages missing
-# source install_python.sh
+$ source install_python.sh
 ```
 and thats it! This is detailed in the [python docs](https://devguide.python.org/setup/#build-dependencies).
 
