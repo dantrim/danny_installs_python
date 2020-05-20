@@ -203,8 +203,7 @@ function main {
                 shift
                 ;;
             -l)
-                WITH_LTO=${2}
-                shift
+                WITH_LTO=1
                 ;;
             *)
                 printf "\n### ERROR Invalid argument provided: $1\n"
