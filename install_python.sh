@@ -106,6 +106,7 @@ function build_cpython {
 
     configure_options="--prefix=${2} \
         --exec_prefix=${2} \
+        --enable-shared \
         --enable-loadable-sqlite-extensions \
         --with-ensurepip=install \
         --enable-ipv6"
