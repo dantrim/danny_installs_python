@@ -56,3 +56,42 @@ $ source <path-to-repo>/install_python.sh
 This will install `python` into a directory `Python-3.X.Y/` in the directory where you ran the above.
 
 The new `python` executable will be located under `Python-3.X.Y/bin/python`.
+
+## Installation Options
+
+The script [install_python.sh](install_python.sh) has a few command-line options that the user may provide.
+These can be viewed by printing the help message:
+
+```bash
+$ source install_python.sh -h
+---------------------------------------------------------
+ install CPython from source
+
+ This script will download and install CPython for you.
+ It installs the python version of your choice, with
+ pip as well.
+
+ Usage:
+   $ source install_python.sh [OPTIONS]
+
+ Options:
+  -v   Python version [default: 3.8.2]
+  -o   Enable optimized installation
+           This corresponds to the CPython configuration flag
+           "--enable-optimizations"
+           [default: false]
+  -l   Enable link-time-optimization (lto)
+           This corresponds to the CPython configuration flag "--with-lto"
+           and providing this flag may not work on every build system.
+           If providing this flag, and installation fails, try again
+           without providing it.
+           [default: false]
+
+---------------------------------------------------------
+```
+
+The option `-v` is pretty well explained. The additional options `-o` and `-l` enable optimization flags.
+Providing either (or both) optimization flags will slow down the overall build process quite a bit, but will lead to more performant
+python runtime execution (10-20% improvements). See this [thread on StackOverflow](https://stackoverflow.com/questions/41405728/what-does-enable-optimizations-do-while-compiling-python) and/or the discussion [here](https://github.com/docker-library/python/issues/160) for more information.
+
+**Note**: The `-l` option (--> `--with-lto`) may result in a build failure on your system (see linked-to discussions above).
