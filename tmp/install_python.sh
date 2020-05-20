@@ -30,6 +30,10 @@ function print_usage {
     echo ""
     echo " Options:"
     echo "  -v   Python version [default: ${default_python_version_tag}]"
+    #echo "  -p   Set installation prefix (where python will be installed)"
+    #echo "           This is where the python header files, python executable," 
+    #echo "           and pip executable will be installed (along with everything else)"
+    #echo "           [default: ${default_prefix}]"
     echo "  -o   Enable optimized installation"
     echo "           This corresponds to the CPython configuration flag"
     echo "           \"--enable-optimizations\""
@@ -69,26 +73,6 @@ function has_wget {
     return 0
 }
 
-function set_num_processors {
-
-    # Set the number of processers used for build to be 
-    # 1 less than are available
-
-    NPROC=1
-    if [[ -f "$(command -v nproc)" ]]; then
-        NPROC="$(nproc)"
-        NPROC="$((NPROC - 1))"
-    elif [[ -f "$(command -v sysctl)" ]]; then
-        NPROC="$(sysctl -n hw.ncpu)" # macOS
-        NPROC="$((NPROC - 1))"
-    elif [[ -f "/proc/cpuinfo" ]]; then
-        NPROC="$(grep -c '^processor' /proc/cpuinfo)"
-        NPROC="$((NPROC - 1))"
-    fi
-
-    echo "$((NPROC))"
-}
-
 function version {
     # from: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
     echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
@@ -100,7 +84,6 @@ function build_cpython {
     # 2: installation prefix
     # 3: flag for optimized build
     # 4: enable link-time-optimization (LTO)
-    # 5: number of processor cores to use for compilation
 
     printf "\n### Installing Python-${1} with prefix=${2}\n"
 
@@ -126,13 +109,8 @@ function build_cpython {
     printf "\n### Configuring: ${configure_options}\n"
     ./configure ${configure_options} 2>&1 |tee configure_step.log
 
-    printf "\n### make -j%s\n" "${5}"
-    #if [ "$(uname)" == "Darwin" ]; then
-    #    export LDFLAGS="-L/usr/local/opt/sqlite/lib"
-    #    export CPPFLAGS="-I/usr/local/opt/sqlite/include"
-    #    export CFLAGS="-I/usr/local/opt/sqlite/include"
-    #fi
-    make -j"${5}" 2>&1 |tee make_step.log
+    printf "\n### make -j2\n"
+    make -j2 2>&1 |tee make_step.log
     status=$?
     if [[ $status -gt 0 ]] ; then
         printf "\n### Failed to make\n"
@@ -183,6 +161,7 @@ function main {
     PYTHON_VERSION_TAG=${default_python_version_tag}
     OPTIMIZED_BUILD=${default_optimized}
     WITH_LTO=${default_lto}
+    #INSTALL_PREFIX=${default_prefix}
 
     while test $# -gt 0
     do
@@ -226,10 +205,7 @@ function main {
 
     pushd Python-${PYTHON_VERSION_TAG}
 
-    NPROC="$(set_num_processors)" 
-    printf "\n### Setting number of processors for build to: ${NPROC}\n"
-
-    if ! build_cpython ${PYTHON_VERSION_TAG} ${INSTALL_PREFIX} ${OPTIMIZED_BUILD} ${WITH_LTO} ${NPROC}; then
+    if ! build_cpython ${PYTHON_VERSION_TAG} ${INSTALL_PREFIX} ${OPTIMIZED_BUILD} ${WITH_LTO}; then
         return 1
     fi
 
